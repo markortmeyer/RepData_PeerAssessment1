@@ -1,25 +1,169 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title:  "Peer Assessment  Assignment 1 - Analyzing “quantified self” Movement Data"
 ---
 
-
-## Loading and preprocessing the data
-
-
-
-## What is mean total number of steps taken per day?
+```{r, warnoff, echo=FALSE}
+        options(warn=-1)
+```
 
 
+### **Question 1 - What is mean total number of steps taken per day?**
 
-## What is the average daily activity pattern?
+#### *Read CSV File and Process Data*
+```{r, processdata, echo=TRUE}
+        alldata <- read.csv("activity.csv", stringsAsFactors=FALSE, na.strings=c("NA", "NULL"))
+        alldata <- data.frame(alldata)
+        totsteps<- aggregate(steps ~ date, alldata, sum, na.action=na.omit)
+        colnames(totsteps) <- c("day", "steps")
+```
+
+#### *Table of Total Steps per Day*
+
+```{r, totstepstable, echo=TRUE}
+        library(knitr)
+        kable(totsteps, col.names=c("date", "total steps"))
+```
+
+#### *Histogram of Total Steps per Day*
+
+```{r, totstepshistogram, echo=TRUE}
+
+        library(ggplot2)
+
+        ptitle <- paste(totsteps$day[1], " to ", totsteps$day[length(totsteps$day)])
+        ggplot(totsteps,aes(x=steps)) +
+                geom_histogram(binwidth=500, fill="lightgreen") +
+                ggtitle(toString(ptitle)) +
+                xlab("Steps per Day (binwidth = 500)") +
+                ylab("Number of People")
+                        
+```
+
+
+#### *Tables of Mean and Median of Steps per Day*
+
+```{r, meanmedian, echo=TRUE}
+        library(knitr)
+        meansteps <- aggregate(steps ~ date, alldata, mean, na.action=na.omit)
+        mediansteps <- aggregate(steps ~ date, alldata, median, na.action=na.omit)
+
+        kable(meansteps, digits=1, col.names=c("date", "mean steps"))
+        kable(mediansteps, digits=1, col.names=c("date", "median steps"))
+```
+
+#### Given the pevalent median value of steps per day being "0" for all days, further 
+####    examination indicates users did not begin recording step counts each day
+####     until approximately 7am.
+
+# End Question 1
+
+=================================================================
+
+# **Question 2 - What is the average daily activity pattern?**
+
+### *Time Series Plot:  5-minute Intervals (x-axis) versus 
+        Average Number of Steps Taken, 
+        Averaged Across All Days (y-axis)*
+
+```{r, 5minavesteps, echo=TRUE}
+        avesteps <- aggregate(steps ~ interval, alldata, mean, na.action=na.omit)
+
+        plot(avesteps$interval, avesteps$steps, type="l", col="blue", main=toString(ptitle),
+             xlab="Daily 5-Minute Intervals", ylab="Average Steps per Interval")
+        
+        idx <- which(avesteps$steps==max(avesteps$steps))
+        points(avesteps$interval[idx], avesteps$steps[idx], pch=19, col="red")
+
+        maxsteps <- round(max(avesteps$steps), digits=0)
+        inter <- avesteps$interval[idx]
+        legtext <- paste(inter, maxsteps, sep=", ")
+
+        text(avesteps$interval[idx]+5, avesteps$steps[idx], labels=legtext,pos=4)
+        legend("topright", c("5-Min Interval, Max Steps"), pch=19,col="red")
+```
+
+### *Which 5-minute interval, on average across all the days in the dataset, 
+        contains the maximum number of steps?*
+## *interval:  835*
 
 
 
-## Imputing missing values
+# *Imputing missing values*
+- total number of missing values in the dataset
+
+```{r,  totalNAvalues, echo=TRUE}
+        totalNA <- length(which(is.na(alldata$steps))==TRUE)
+```
+
+## *Total NA values:  2304*
 
 
+### *Removing NA values from "steps"*
+#### *Fill NA values with mean of respective interval over all days*
 
-## Are there differences in activity patterns between weekdays and weekends?
+```{r,  fillinNAvalues, echo=TRUE}
+        alldata <- read.csv("activity.csv", stringsAsFactors=FALSE)
+        alldata <- data.frame(alldata)
+
+        newsteps <- alldata
+        newtotsteps<- aggregate(steps ~ interval, newsteps, mean, na.action=na.omit)
+
+        for (i in 1:length(newsteps$steps)){
+                idx <- newtotsteps$interval == newsteps$interval[i]
+                if(is.na(newsteps$steps[i])){
+                        newsteps$steps[i] <- round(newtotsteps$steps[idx])
+                }
+        }
+```
+
+
+#### *Histogram of Total Steps per Day with NAs Filled*
+
+```{r, newtotstepshistogram, echo=TRUE}
+
+        totsteps<- aggregate(steps ~ date, newsteps, sum)
+        colnames(totsteps) <- c("day", "steps")
+
+        ptitle <- paste(totsteps$day[1], " to ", totsteps$day[length(totsteps$day)])
+        ggplot(totsteps,aes(x=steps)) +
+                geom_histogram(binwidth=500, fill="lightgreen") +
+                ggtitle(toString(ptitle)) +
+                xlab("Steps per Day (binwidth = 500) with Filled NA") +
+                ylab("Number of People") 
+
+```
+        
+
+#### *Tables of Mean and Median of Steps per Day with NAs Filled*
+
+```{r, newmeanmedian, echo=TRUE}
+
+        meansteps <- aggregate(steps ~ date, newsteps, mean)
+        mediansteps <- aggregate(steps ~ date, newsteps, median)
+
+        kable(meansteps, digits=1, col.names=c("date", "mean steps"))
+        kable(mediansteps, digits=1, col.names=c("date", "median steps"))
+```
+
+
+# **Question 3 - Are there differences in activity patterns between weekdays and weekends?**
+
+```{r, weekdayweekend, echo=TRUE}
+ 
+        library(timeDate)
+
+        newsteps$weekday <- isWeekday(newsteps$date, wday=1:5)
+        newsteps$weekday <- factor(newsteps$weekday, labels=c("weekend", "weekday"))
+
+        idwkd <- newsteps$weekday == "weekday"
+        idwke <- newsteps$weekday == "weekend"
+
+        
+        plot(newsteps$interval[idwkd], newsteps$steps[idwkd], xlab="Interval", ylab="Number of Steps", col="blue", type="l", main="Average Steps per 5-Minute Interval")
+        lines(newsteps$interval[idwke], newsteps$steps[idwke], col="red")
+
+        legend("topright", c("weekday", "weekend"), lty=c(1,1), lwd=c(2.5,2.5),col=c("blue", "red"), bty="n")
+```
+
+#### More steps per 5-minute interval occur in the morning during weekdays, and more steps per 5-minute interval occur in the afternoon on weekends.
+
