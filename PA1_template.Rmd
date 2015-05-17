@@ -1,6 +1,6 @@
----
-title:  "Peer Assessment  Assignment 1 - Analyzing “quantified self” Movement Data"
----
+
+# **Peer Assessment  Assignment 1 - Analyzing “quantified self” Movement Data**
+
 
 ```{r, warnoff, echo=FALSE}
         options(warn=-1)
