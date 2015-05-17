@@ -240,9 +240,7 @@ title:  "Peer Assessment  Assignment 1 - Analyzing “quantified self” Movemen
 
 # **Question 2 - What is the average daily activity pattern?**
 
-### *Time Series Plot:  5-minute Intervals (x-axis) versus 
-        Average Number of Steps Taken, 
-        Averaged Across All Days (y-axis)*
+### *Time Series Plot:  5-minute Intervals (x-axis) versus Average Number of Steps Taken, Averaged Across All Days (y-axis)*
 
 
 ```r
@@ -264,14 +262,12 @@ title:  "Peer Assessment  Assignment 1 - Analyzing “quantified self” Movemen
 
 ![plot of chunk 5minavesteps](figure/5minavesteps-1.png) 
 
-### *Which 5-minute interval, on average across all the days in the dataset, 
-        contains the maximum number of steps?*
+### *Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?*
 ## *interval:  835*
 
 
 
 # *Imputing missing values*
-- total number of missing values in the dataset
 
 
 ```r
@@ -465,6 +461,9 @@ title:  "Peer Assessment  Assignment 1 - Analyzing “quantified self” Movemen
 |2012-11-29 |          0.0|
 |2012-11-30 |         34.5|
 
+# End Question 2
+
+==================================================
 
 # **Question 3 - Are there differences in activity patterns between weekdays and weekends?**
 
@@ -489,3 +488,5 @@ title:  "Peer Assessment  Assignment 1 - Analyzing “quantified self” Movemen
 
 #### More steps per 5-minute interval occur in the morning during weekdays, and more steps per 5-minute interval occur in the afternoon on weekends.
 
+
+# End Question 3
